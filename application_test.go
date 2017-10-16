@@ -19,6 +19,7 @@ package gocongress
 import (
 	"net/http"
 	"testing"
+	"time"
 )
 
 func TestApplications(t *testing.T) {
@@ -63,6 +64,10 @@ func TestApplications(t *testing.T) {
 	}
 	if !found {
 		t.Fatal("Couldn't locate application in list")
+	}
+
+	if _, err := client.GetApplication(app.EUI); err != nil {
+		t.Fatal("Should be able to retrieve application")
 	}
 
 	// Delete the application. List shouldn't contain any applications
@@ -156,6 +161,29 @@ func TestAppOutput(t *testing.T) {
 	if err := op1.Delete(); ErrorStatusCode(err) != http.StatusNotFound {
 		t.Fatalf("Expected 404 not found when deleting output a second time but got %d", ErrorStatusCode(err))
 	}
+
+	app.Delete()
+}
+
+// Test the websocket output. There's no easy way to generate output
+func TestWebsocketOutput(t *testing.T) {
+	client, _ := NewCongressClient(EnvironmentToken)
+	app, _ := client.NewApplication()
+	d1, _ := app.NewDevice(OTAA)
+	d2, _ := app.NewDevice(ABP)
+
+	ch, _, err := app.DataStream()
+	if err != nil {
+		t.Fatalf("Couldn't open data stream for application: %v", err)
+	}
+
+	select {
+	case <-ch:
+	case <-time.After(700 * time.Millisecond):
+		// OK
+	}
+	d1.Delete()
+	d2.Delete()
 
 	app.Delete()
 }

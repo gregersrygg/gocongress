@@ -19,6 +19,7 @@ package gocongress
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net"
 	"net/http"
 	"os"
@@ -153,6 +154,16 @@ func (c *CongressClient) Applications() ([]Application, error) {
 		return nil, err
 	}
 	return list.(*appList).Apps, nil
+}
+
+// GetApplication retrieves an application from Congress.
+func (c *CongressClient) GetApplication(eui string) (*Application, error) {
+	app := &Application{"", newTags(), c}
+	existingApp, err := c.genericGet(fmt.Sprintf("/applications/%s", eui), app)
+	if err != nil {
+		return nil, err
+	}
+	return existingApp.(*Application), nil
 }
 
 // NewGateway creates a new gateway in Congress.
