@@ -22,26 +22,35 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"os"
 )
 
 const (
-	// DefaultEndpoint is the default endpoint used by Congress. It can be
-	// overridden by setting the environment variable `CONGRESS_API_ENDPOINT`
-	DefaultEndpoint = "https://api.lora.telenor.io"
-
-	// EnvironmentToken is the default value for tokens; ie use environment variable
-	// to retrieve API tokens.
-	EnvironmentToken = ""
+	// DefaultAddr is the default address of Congress.
+	DefaultAddr = "https://api.lora.telenor.io"
 
 	tokenHeader = "X-API-Token"
 )
 
 // CongressClient is the client interface you use to interact with Congress.
 type CongressClient struct {
-	Token    string
-	Endpoint string
-	client   http.Client
+	Addr   string
+	Token  string
+	client http.Client
+}
+
+// NewCongressClient creates a new CongressClient.
+func NewCongressClient(token string) (*CongressClient, error) {
+	return NewCongressClientWithAddr(DefaultAddr, token)
+}
+
+// NewCongressClientWithAddr creates a new CongressClient that talks to the supplied address.
+// It is only useful for internal testing; all clients should use NewCongressClient.
+func NewCongressClientWithAddr(addr, token string) (*CongressClient, error) {
+	c := &CongressClient{
+		Addr:  addr,
+		Token: token,
+	}
+	return c, c.Ping()
 }
 
 // Create a new (default) request; set the content type and encode the entity
@@ -53,7 +62,7 @@ func (c *CongressClient) newRequest(path string, entity interface{}) (*http.Requ
 			return nil, err
 		}
 	}
-	req, err := http.NewRequest(http.MethodGet, c.Endpoint+path, body)
+	req, err := http.NewRequest(http.MethodGet, c.Addr+path, body)
 	if err != nil {
 		return nil, err
 	}
@@ -63,9 +72,9 @@ func (c *CongressClient) newRequest(path string, entity interface{}) (*http.Requ
 }
 
 // Ping performs a simple request to the root resource of the Congress server.
-func (c *CongressClient) Ping() (*CongressClient, error) {
+func (c *CongressClient) Ping() error {
 	_, err := c.genericGet("/", nil)
-	return c, err
+	return err
 }
 
 // Perform a generic GET request
@@ -118,22 +127,7 @@ func (c *CongressClient) genericDelete(path string) error {
 	return responseToError(resp)
 }
 
-// NewCongressClient creates a new CongressClient instance. If the token string
-// is empty it will use the environment variable `CONGRESS_API_TOKEN`
-func NewCongressClient(apiToken string) (*CongressClient, error) {
-	ep := os.Getenv("CONGRESS_API_ENDPOINT")
-	if ep == "" {
-		ep = DefaultEndpoint
-	}
-	if apiToken == "" {
-		apiToken = os.Getenv("CONGRESS_API_TOKEN")
-	}
-	client := &CongressClient{apiToken, ep, http.Client{}}
-
-	return client.Ping()
-}
-
-// NewApplication creates a new application instance.
+// NewApplication creates a new application.
 func (c *CongressClient) NewApplication() (*Application, error) {
 	app := &Application{"", newTags(), c}
 	ret, err := c.genericMutation(http.MethodPost, "/applications", app)

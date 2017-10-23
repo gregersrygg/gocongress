@@ -23,7 +23,7 @@ import (
 )
 
 func TestDevices(t *testing.T) {
-	client, err := NewCongressClient(EnvironmentToken)
+	client, err := NewCongressClientWithAddr(*addr, *token)
 	if err != nil {
 		t.Fatalf("Couldn't create Congress client: %v", err)
 	}
@@ -75,7 +75,7 @@ func TestDevices(t *testing.T) {
 }
 
 func TestDownstreamMessages(t *testing.T) {
-	client, err := NewCongressClient(EnvironmentToken)
+	client, err := NewCongressClientWithAddr(*addr, *token)
 	if err != nil {
 		t.Fatalf("Couldn't create Congress client: %v", err)
 	}
@@ -102,7 +102,7 @@ func TestDownstreamMessages(t *testing.T) {
 
 // Create a lot of devices, then update them individually
 func TestMultipleDevices(t *testing.T) {
-	client, _ := NewCongressClient(EnvironmentToken)
+	client, _ := NewCongressClientWithAddr(*addr, *token)
 	app, _ := client.NewApplication()
 
 	devices := make([]*Device, 10)

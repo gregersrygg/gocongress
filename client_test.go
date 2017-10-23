@@ -17,31 +17,39 @@ package gocongress
  */
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"testing"
 )
 
+var (
+	addr  = flag.String("addr", DefaultAddr, "congress API addr")
+	token = flag.String("api-token", "", "congress API token")
+)
+
 func TestMain(m *testing.M) {
-	if os.Getenv("CONGRESS_API_TOKEN") == "" {
-		fmt.Println("The CONGRESS_API_TOKEN environment variable must be set to run the tests")
-		os.Exit(1)
+	flag.Parse()
+	if *token == "" {
+		if _, err := NewCongressClientWithAddr(*addr, ""); err != nil {
+			fmt.Println("Error creating client:", err)
+			fmt.Println("You might need to set the token flag when running the tests against the address", *addr)
+			fmt.Println("That is, run `go test -args -token <your-api-token>.")
+			os.Exit(1)
+		}
 	}
+
 	os.Exit(m.Run())
 }
 
-func xTestPing(t *testing.T) {
+func TestPing(t *testing.T) {
 	// Ping is implicit
-	if _, err := NewCongressClient("invalid"); err == nil {
-		t.Fatal("Expected error when using invalid token but the returned error was nil")
-	}
-
-	client, err := NewCongressClient(EnvironmentToken)
+	client, err := NewCongressClientWithAddr(*addr, *token)
 	if err != nil {
 		t.Fatalf("Got error creating client: %v", err)
 	}
 
-	if _, err := client.Ping(); err != nil {
+	if err := client.Ping(); err != nil {
 		t.Fatalf("Got error calling ping(): %v", err)
 	}
 }

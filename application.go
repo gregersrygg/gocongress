@@ -207,12 +207,12 @@ type DataErrorMessage string
 // Error messages are sent on the error channel that is returned.
 func (app *Application) DataStream() (chan DataMessage, chan DataErrorMessage, error) {
 
-	congressURL, err := url.Parse(app.client.Endpoint)
+	congressURL, err := url.Parse(app.client.Addr)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	wscfg, err := websocket.NewConfig(fmt.Sprintf("ws://%s/applications/%s/stream", congressURL.Host, app.EUI), "http://example.com")
+	wscfg, err := websocket.NewConfig(fmt.Sprintf("wss://%s/applications/%s/stream", congressURL.Host, app.EUI), "http://example.com")
 	if err != nil {
 		return nil, nil, err
 	}

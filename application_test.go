@@ -23,7 +23,7 @@ import (
 )
 
 func TestApplications(t *testing.T) {
-	client, err := NewCongressClient(EnvironmentToken)
+	client, err := NewCongressClientWithAddr(*addr, *token)
 	if err != nil {
 		t.Fatalf("Got error creating client: %v", err)
 	}
@@ -80,7 +80,7 @@ func TestApplications(t *testing.T) {
 }
 
 func TestAppOutput(t *testing.T) {
-	client, _ := NewCongressClient(EnvironmentToken)
+	client, _ := NewCongressClientWithAddr(*addr, *token)
 	app, _ := client.NewApplication()
 
 	mqtt1 := &MQTTConfig{
@@ -167,7 +167,7 @@ func TestAppOutput(t *testing.T) {
 
 // Test the websocket output. There's no easy way to generate output
 func TestWebsocketOutput(t *testing.T) {
-	client, _ := NewCongressClient(EnvironmentToken)
+	client, _ := NewCongressClientWithAddr(*addr, *token)
 	app, _ := client.NewApplication()
 	d1, _ := app.NewDevice(OTAA)
 	d2, _ := app.NewDevice(ABP)
