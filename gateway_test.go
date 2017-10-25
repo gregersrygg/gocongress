@@ -32,7 +32,7 @@ func randomEUI() string {
 }
 
 func TestGateway(t *testing.T) {
-	client, err := NewCongressClient(EnvironmentToken)
+	client, err := NewCongressClientWithAddr(*addr, *token)
 	if err != nil {
 		t.Fatalf("Got error creating client: %v", err)
 	}
