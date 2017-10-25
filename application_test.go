@@ -169,8 +169,18 @@ func TestAppOutput(t *testing.T) {
 func TestWebsocketOutput(t *testing.T) {
 	client, _ := NewCongressClient(EnvironmentToken)
 	app, _ := client.NewApplication()
-	d1, _ := app.NewDevice(OTAA)
-	d2, _ := app.NewDevice(ABP)
+
+	dp1 := &Device{
+		DeviceType: "OTAA",
+	}
+	d1, _ := app.NewDevice(dp1)
+	dp2 := &Device{
+		DeviceType:            "ABP",
+		DeviceAddress:         "01020309",
+		ApplicationSessionKey: "ff00ff00ff00ff00ff00ff00ff00ff00",
+		NetworkSessionKey:     "ff00ff00ff00ff00ff00ff00ff00ff00",
+	}
+	d2, _ := app.NewDevice(dp2)
 
 	ch, _, err := app.DataStream()
 	if err != nil {

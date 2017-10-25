@@ -29,7 +29,7 @@ func TestDevices(t *testing.T) {
 	}
 
 	app, _ := client.NewApplication()
-	otaa, err := app.NewDevice(OTAA)
+	otaa, err := app.NewDeviceOTAA()
 
 	if err != nil {
 		t.Fatalf("Couldn't create OTAA device: %v", err)
@@ -62,7 +62,7 @@ func TestDevices(t *testing.T) {
 		t.Fatalf("Expected not found on deleted device but got %v", err)
 	}
 
-	abp, err := app.NewDevice(ABP)
+	abp, err := app.NewDeviceABP("004e98dd", "f7679b721027a8d4d6173d77cb6023c0", "31a29f3eb57002cbd785084b737caf7f")
 	if err != nil {
 		t.Fatalf("Couldn't create ABP device: %v", err)
 	}
@@ -71,6 +71,20 @@ func TestDevices(t *testing.T) {
 	}
 	if err := abp.Delete(); ErrorStatusCode(err) != http.StatusNotFound {
 		t.Fatalf("Expected ErrNotFound but got %v", err)
+	}
+
+	deviceParams := &Device{
+		DeviceType:            "ABP",
+		DeviceAddress:         "0094658d",
+		ApplicationSessionKey: "3a749acee7bf30ea74b7def857bdb1db",
+		NetworkSessionKey:     "f1e339daf014b592994fae5136156acf",
+	}
+	device, err := app.NewDevice(deviceParams)
+	if err != nil {
+		t.Fatalf("Couldn't create Device: %v", err)
+	}
+	if err := device.Delete(); err != nil {
+		t.Fatalf("Got error deleting device: %v", err)
 	}
 }
 
@@ -81,7 +95,7 @@ func TestDownstreamMessages(t *testing.T) {
 	}
 
 	app, _ := client.NewApplication()
-	device, _ := app.NewDevice(OTAA)
+	device, _ := app.NewDeviceOTAA()
 
 	msg, err := device.EnqueueMessage([]byte{1, 2, 3, 4, 5, 6, 7}, 1, false)
 	if err != nil {
@@ -108,7 +122,7 @@ func TestMultipleDevices(t *testing.T) {
 	devices := make([]*Device, 10)
 	var err error
 	for i := 0; i < len(devices); i++ {
-		if devices[i], err = app.NewDevice(ABP); err != nil {
+		if devices[i], err = app.NewDeviceOTAA(); err != nil {
 			t.Errorf("Got error creating device: %v", err)
 		}
 	}
