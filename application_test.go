@@ -171,7 +171,7 @@ func TestWebsocketOutput(t *testing.T) {
 	app, _ := client.NewApplication()
 
 	dp1 := &Device{
-		DeviceType: "OTAA",
+		DeviceType: string(OTAA),
 	}
 	d1, _ := app.NewDevice(dp1)
 	dp2 := &Device{
